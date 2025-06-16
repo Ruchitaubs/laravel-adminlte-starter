@@ -1,0 +1,53 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Models\Result;
+
+class SearchController extends Controller
+{
+    public function index()
+    {
+        return view('frontend.search.index');
+    }
+
+    public function execute(Request $req)
+    {
+        $req->validate([
+            'source'=>'required|string',
+            'query'=>'required|string',
+        ]);
+
+        // Placeholder: pretend we fetched results
+        $results = collect([
+            (object)[
+                'title'=>'Sample Article A',
+                'authors'=>'Author A, Author B',
+                'abstract'=>'This is a sample abstract for Article A...',
+            ],
+            (object)[
+                'title'=>'Sample Article B',
+                'authors'=>'Author C, Author D',
+                'abstract'=>'This is a sample abstract for Article B...',
+            ],
+        ]);
+
+        // Save to DB
+        foreach($results as $r){
+            Result::create([
+                'source'=>$req->source,
+                'query'=>$req->query,
+                'title'=>$r->title,
+                'authors'=>$r->authors,
+                'abstract'=>$r->abstract,
+            ]);
+        }
+
+        return view('frontend.search.results', [
+            'results'=>$results,
+            'query'=>$req->query,
+            'source'=>$req->source
+        ]);
+    }
+}

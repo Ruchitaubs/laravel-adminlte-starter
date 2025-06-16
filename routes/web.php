@@ -1,28 +1,50 @@
 <?php
 
-use App\Http\Controllers\Admin\DashboardController;
-use App\Http\Controllers\Admin\PermissionController;
-use App\Http\Controllers\Admin\RoleController;
-use App\Http\Controllers\Admin\UserController;
-use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SearchController;
 
+/*
+|--------------------------------------------------------------------------
+| Public Routes (No Login Required)
+|--------------------------------------------------------------------------
+*/
+
+ 
 Route::get('/', function () {
-    return redirect()->route('admin.dashboard.index');
+    return view('frontend.home');
+})->name('home');
+
+
+Route::get('/home', function () {
+    return redirect()->route('home');
 });
 
-Route::group(['middleware' => ['auth']], function () {
+/*
+|--------------------------------------------------------------------------
+| Protected Routes (Admin Login)
+|--------------------------------------------------------------------------
+*/
+ 
+ 
+Route::middleware(['auth', 'role:admin'])->get('/dashboard', function () {
+    return view('dashboard');
+})->name('dashboard');
 
-    Route::group(['prefix' => 'admin', 'as' => 'admin.'], function () {
-        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
-        Route::resource('roles', RoleController::class)->except(['show']);
-        Route::resource('permissions', PermissionController::class)->except(['show']);
-        Route::resource('users', UserController::class);
-    });
-
-    Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
-    Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::put('/profile/edit', [ProfileController::class, 'update'])->name('profile.update');
+/*
+|--------------------------------------------------------------------------
+| Protected Routes (Login + Email Verification Required)
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth', 'verified'])->group(function () {
+    
+	// Search functionality
+    Route::get('/search', [SearchController::class, 'index'])->name('search');
+    Route::post('/search', [SearchController::class, 'execute'])->name('search.execute');
+	
+	Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-require __DIR__ . '/auth.php';
+require __DIR__.'/auth.php';

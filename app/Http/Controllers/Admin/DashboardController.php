@@ -9,7 +9,6 @@ class DashboardController extends Controller
 {
     public function index(): View
     {
-        validate_permission('dashboard.read');
-        return view('admin.dashboard.index');
+        return view('admin.dashboard');
     }
 }
